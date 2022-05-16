@@ -60,16 +60,17 @@ const Form = {
         placeholder="Description"
         class="field"
       />
+      <div v-if="event.category === 'sustainability'">
+        <h3>Where is your event?</h3>
 
-      <h3>Where is your event?</h3>
-
-      <label>Location</label>
-      <input
-        v-model="event.location"
-        type="text"
-        placeholder="Location"
-        class="field"
-      />
+        <label>Location</label>
+        <input
+          v-model="event.location"
+          type="text"
+          placeholder="Location"
+          class="field"
+        />
+      </div>
 
       <h3>Are pets allowed?</h3>
       <div>
