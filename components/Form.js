@@ -5,7 +5,7 @@ const Form = {
     
   },
   setup() {
-    const categories = [
+    const categories = Vue.ref([
       'sustainability',
       'nature',
       'animal welfare',
@@ -13,8 +13,8 @@ const Form = {
       'education',
       'food',
       'community'
-    ];
-    const event = {
+    ]);
+    const event = Vue.ref({
       category: '',
       title: '',
       description: '',
@@ -24,15 +24,15 @@ const Form = {
         catering: false,
         music: false
       }
-    };
+    });
     
     return { categories, event };
   },
   template: /*html*/`
   <div>
     <h1>Create an event</h1>
+    <pre>{{ event }}</pre>
     <form>
-
       <label>Select a category</label>
       <select v-model="event.category">
         <option
@@ -113,8 +113,6 @@ const Form = {
 
       <button type="submit">Submit</button>
     </form>
-
-    <pre>{{ event }}</pre>
   </div>
   `
 }
