@@ -15,8 +15,19 @@ const Form = {
     //     music: false
     //   }
     // });
+    const coOwnerScenarios = [
+      'section1Expanded.subsection2Shown.youAreTheRepresentative.selectingApplicantType',
+      'section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForPerson.lawyer',
+      'section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForPerson.friend',
+      'section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForPerson.familyMember',
+      'section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForPerson.interpreter',
+      'section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForLegalEntity.inHouseLegalServices',
+      'section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForLegalEntity.lawyer',
+      'section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForLegalEntity.interpreter',
+      'section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForLegalEntity.employeeForNFPClinic'
+    ];
     
-    return { state, send };
+    return { state, send, coOwnerScenarios };
   },
   template: /*html*/`
     <div class="container-fluid">
@@ -166,19 +177,18 @@ const Form = {
                 </fieldset>
 
                 <!-- 1.2. The Applicant - Other Co-Owners? -->
-                <fieldset v-if="state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForCondoCorp')">
+                <fieldset v-if="coOwnerScenarios.some(state.matches)">
                   <legend>Are there any other co-owners?</legend>
                   <div class="form-check">
                     <input type="radio" class="form-check-input" id="is-co-owner"
                         v-model="state.context.isCoOwner" :value="true"
-                        @change="send('SET_IS_CO_OWNER_TRUE')" />
+                        @change="send({ type: 'SET_IS_CO_OWNER', value: $event.target.value })" />
                     <label for="is-co-owner">Yes</label>
                   </div>
                   <div class="form-check">
                     <input type="radio" class="form-check-input" id="not-co-owner"
                       v-model="state.context.isCoOwner" :value="false"
-                      @change="send('SET_IS_CO_OWNER_FALSE')"
-                    />
+                      @change="($event) => send({ type: 'SET_IS_CO_OWNER', value: $event.target.value })" />
                     <label for="not-co-owner">No</label>
                   </div>
                 </fieldset>
