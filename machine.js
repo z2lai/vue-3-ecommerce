@@ -1,14 +1,5 @@
 const { assign, createMachine } = XState;
 
-// const setIsCoOwnerOptions = {
-//   SET_IS_CO_OWNER_TRUE: {
-//     actions: assign({ isCoOwner: (context, event) => event.target.value }),
-//   },
-//   SET_IS_CO_OWNER_FALSE: {
-//     actions: assign({ isCoOwner: (context, event) => event.target.value }),
-//   },
-// };
-
 const selectingRepTypeForPersonOptions = {
   // for each of these transitions, create action to clear all inputs unrelated
   // to the selection while leaving the data for related inputs
@@ -22,13 +13,13 @@ const selectingRepTypeForLegalEntityOptions = {
   SELECT_IN_HOUSE_LEGAL_SERVICES: ".inHouseLegalServices",
   SELECT_LAWYER: ".lawyer",
   SELECT_INTERPRETER: ".interpreter",
-  SELECT_EMPLOYEE_FOR_NFP: ".employeeForNFPClinic",
+  SELECT_EMPLOYEE_FOR_NFP_CLINIC: ".employeeForNFPClinic",
 };
 
 const selectingRepTypeForCondoCorpOptions = {
   SELECT_LAWYER: ".lawyer",
   SELECT_INTERPRETER: ".interpreter",
-  SELECT_EMPLOYEE_FOR_NFP: ".employeeForNFP",
+  SELECT_EMPLOYEE_FOR_NFP_CLINIC: ".employeeForNFPClinic",
   SELECT_EMPLOYEE_OF_LEGAL_CLINIC: ".employeeOfLegalClinic",
 };
 
@@ -134,7 +125,7 @@ const wizardMachine = createMachine(
                       default: {},
                       lawyer: {},
                       interpreter: {},
-                      employeeForNFP: {},
+                      employeeForNFPClinic: {},
                       employeeOfLegalClinic: {},
                     },
                     on: selectingRepTypeForCondoCorpOptions,
@@ -188,7 +179,7 @@ const wizardMachine = createMachine(
         },
         on: {},
       },
-      section2Expanded: {},
+      section2Expanded: { type: 'final' },
     },
   },
   {

@@ -16,7 +16,7 @@ const Form = {
     //   }
     // });
     const coOwnerScenarios = [
-      'section1Expanded.subsection2Shown.youAreTheRepresentative.selectingApplicantType',
+      'section1Expanded.subsection2Shown.youAreTheApplicant',
       'section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForPerson.lawyer',
       'section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForPerson.friend',
       'section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForPerson.familyMember',
@@ -38,7 +38,7 @@ const Form = {
             <pre>{{ state.event }}</pre>
             State:
             <pre>{{ state.value }}</pre>
-            Data:
+            Context:
             <pre>{{ state.context }}</pre>
           </div>
         </div>
@@ -48,16 +48,17 @@ const Form = {
             <section class="card">
               <div class="card-body">
                 <h3>1.1. About You</h3>
+<!-- Question 1 -->
                 <fieldset>
                   <legend>Are you the Applicant in this application or are you filing this CAT application on behalf of the Applicant?</legend>
                   <div class="form-check">
                     <input
                         type="radio"
-                        class="form-check-input"
-                        v-model="state.context.yourRole"
-                        value="applicant"
-                        name="role"
                         id="applicant-role"
+                        name="role"
+                        class="form-check-input"
+                        value="applicant"
+                        :checked="state.context.yourRole === 'applicant'"
                         @change="send('SELECT_APPLICANT_ROLE')"
                       />
                     <label for="applicant-role">I am filing this CAT application as the Applicant</label>
@@ -65,27 +66,30 @@ const Form = {
                   <div class="form-check">
                     <input
                       type="radio"
-                      class="form-check-input"
-                      v-model="state.context.yourRole"
-                      value="representative"
-                      name="role"
                       id="representative-role"
+                      name="role"
+                      class="form-check-input"
+                      value="representative"
+                      :checked="state.context.yourRole === 'representative'"
                       @change="send('SELECT_REPRESENTATIVE_ROLE')"
                     />
                     <label for="representative-role">I am filing this CAT application as a representative of the Applicant</label>
                   </div>
                 </fieldset>
                 
-                <button type="button" class="btn btn-primary" @click="send('CONTINUE')">Continue</button>
+                <button v-if="state.matches('section1Expanded.subsection1Shown')" type="button" class="btn btn-primary" @click="send('CONTINUE')">Continue</button>
               </div>
             </section>
 
-            <section class="card">
+            <section class="card" v-if="state.matches('section1Expanded.subsection2Shown')">
               <!-- 1.2. The Applicant - You are the applicant -->
               <div class="card-body" v-if="state.matches('section1Expanded.subsection2Shown.youAreTheApplicant')">
-                applicant
+                <h3>1.2. The Applicant</h3>
+                Fill in your info.
+                <button type="button" class="btn btn-primary" @click="send('CONTINUE')">Continue</button>
               </div>
 
+<!-- Question 2 -->
               <!-- 1.2. The Applicant - You are the representative -->
               <div class="card-body" v-else-if="state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative')">
                 <h3>1.2. The Applicant</h3>
@@ -93,26 +97,27 @@ const Form = {
                   <legend>Sarah, can you tell us what kind of Applicant you are representing?</legend>
                   <div class="form-check">
                     <input type="radio" class="form-check-input" id="person-applicant"
-                        v-model="state.context.applicantType" value="Condo Owner Rep"
+                        :checked="state.context.applicantType === 'Condo Owner Rep'" value="Condo Owner Rep"
                         @change="send('SELECT_PERSON_TYPE')" />
                     <label for="person-applicant">The Applicant is the person who owns the condominium unit</label>
                   </div>
                   <div class="form-check">
                     <input type="radio" class="form-check-input" id="legal-entity-applicant"
-                      v-model="state.context.applicantType" value="Legal Entity Rep"
+                      :checked="state.context.applicantType === 'Legal Entity Rep'" value="Legal Entity Rep"
                       @change="send('SELECT_LEGAL_ENTITY_TYPE')"
                     />
                     <label for="legal-entity-applicant">The Applicant is the legal entity that owns the condominium unit</label>
                   </div>
                   <div class="form-check">
                     <input type="radio" class="form-check-input" id="condo-corp-applicant"
-                      v-model="state.context.applicantType" value="Condo Corp Rep"
+                      :checked="state.context.applicantType === 'Condo Corp Rep'" value="Condo Corp Rep"
                       @change="send('SELECT_CONDO_CORP_TYPE')"
                     />
                     <label for="condo-corp-applicant">The Applicant is the condominium corporation</label>
                   </div>
                 </fieldset>
 
+<!-- Question 3 - Part 1 -->
                 <!-- 1.2. The Applicant - You are the representative - Condo Owner Rep-->
                 <fieldset v-if="state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForPerson')">
                   <legend>Sarah, in what capacity are you representing the Applicant?</legend>
@@ -147,10 +152,10 @@ const Form = {
                   </div>
                   <div class="form-check">
                     <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_INTERPRETER')" />
-                    <label>Friend/Neighbour</label>
+                    <label>Interpretor/Translator</label>
                   </div>
                   <div class="form-check">
-                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_EMPLOYEE_FOR_NFP')" />
+                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_EMPLOYEE_FOR_NFP_CLINIC')" />
                     <label>Employee for Not-for-Profit Clinic</label>
                   </div>
                 </fieldset>
@@ -167,7 +172,7 @@ const Form = {
                     <label>Interpretor/Translator</label>
                   </div>
                   <div class="form-check">
-                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_EMPLOYEE_FOR_NFP')" />
+                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_EMPLOYEE_FOR_NFP_CLINIC')" />
                     <label>Employee for Not-for-Profit Clinic</label>
                   </div>
                   <div class="form-check">
@@ -175,26 +180,69 @@ const Form = {
                     <label>Employee of Legal Clinic</label>
                   </div>
                 </fieldset>
+              </div>
+<!-- Question 3 - Part 2 -->
+              <div class="card-body" v-if="state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForPerson.lawyer')
+                                            || state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForLegalEntity.lawyer')
+                                            || state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForCondoCorp.lawyer')">
+                <h4>Lawyer/Paralegal Details</h4>
+              </div>
+              <div class="card-body" v-else-if="state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForPerson.friend')">
+                <h4>Friend Details</h4>
+              </div>
+              <div class="card-body" v-else-if="state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForPerson.familyMember')">
+                <h4>Family Member Details</h4>
+              </div>
+              <div class="card-body" v-else-if="state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForPerson.interpreter')
+                                                || state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForLegalEntity.interpreter')
+                                                || state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForCondoCorp.interpreter')">
+                <h4>Interpreter Details</h4>
+              </div>
+              <div class="card-body" v-else-if="state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForLegalEntity.inHouseLegalServices')">
+                <h4>In-House Legal Services Details</h4>
+              </div>
+              <div class="card-body" v-else-if="state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForLegalEntity.employeeForNFPClinic')
+                                                || state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForCondoCorp.employeeForNFPClinic')">
+                <h4>Employee for Non-for-Profit Clinic Details</h4>
+              </div>
+              <div class="card-body" v-else-if="state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForCondoCorp.employeeOfLegalClinic')">
+                <h4>Employee of Legal Clinic Details</h4>
+              </div>
 
-                <!-- 1.2. The Applicant - Other Co-Owners? -->
-                <fieldset v-if="coOwnerScenarios.some(state.matches)">
+<!-- Question 4 -->
+              <!-- 1.2. The Applicant - Other Co-Owners? -->
+              <div class="card-body" v-if="coOwnerScenarios.some(state.matches)">
+                <fieldset>
                   <legend>Are there any other co-owners?</legend>
                   <div class="form-check">
                     <input type="radio" class="form-check-input" id="is-co-owner"
-                        v-model="state.context.isCoOwner" :value="true"
-                        @change="send({ type: 'SET_IS_CO_OWNER', value: $event.target.value })" />
+                        :checked="state.context.isCoOwner === true" value="true"
+                        @change="($event) => send({ type: 'SET_IS_CO_OWNER', value: $event.target.value === 'true' })" />
                     <label for="is-co-owner">Yes</label>
                   </div>
                   <div class="form-check">
                     <input type="radio" class="form-check-input" id="not-co-owner"
-                      v-model="state.context.isCoOwner" :value="false"
-                      @change="($event) => send({ type: 'SET_IS_CO_OWNER', value: $event.target.value })" />
+                      :checked="state.context.isCoOwner === false" value="false"
+                      @change="($event) => send({ type: 'SET_IS_CO_OWNER', value: $event.target.value === 'true' })" />
                     <label for="not-co-owner">No</label>
                   </div>
                 </fieldset>
+                <button type="button" class="btn btn-primary" @click="send('CONTINUE')">Continue</button>
               </div>
             </section>
 
+            <section class="card">
+            <!-- 1.3. Co-Owners -->
+              <div class="card-body" v-if="state.matches('section1Expanded.subsection3Shown')">
+                <h3>1.3 Co-Owners</h3>
+                <h4>Add co-owners</h4>
+                <button type="button" class="btn btn-primary" @click="send('CONTINUE')">Continue</button>
+              </div>
+              <div class="card-body" v-if="state.matches('section1Expanded.section1Complete')">
+                <h3>Section 1 Completed!</h3>
+                <button type="submit" class="btn btn-primary" @click="alert(state.context)">Continue</button>
+              </div>
+            </section>
             <!--
             <label>Select a category</label>
             <select v-model="event.category">
