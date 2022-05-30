@@ -48,7 +48,7 @@ const Form = {
             <section class="card">
               <div class="card-body">
                 <h3>1.1. About You</h3>
-<!-- Question 1 -->
+<!-- Section 1: Question 1 -->
                 <fieldset>
                   <legend>Are you the Applicant in this application or are you filing this CAT application on behalf of the Applicant?</legend>
                   <div class="form-check">
@@ -81,6 +81,7 @@ const Form = {
               </div>
             </section>
 
+<!-- Section 2: Question 1 -->
             <section class="card" v-if="state.matches('section1Expanded.subsection2Shown')">
               <!-- 1.2. The Applicant - You are the applicant -->
               <div class="card-body" v-if="state.matches('section1Expanded.subsection2Shown.youAreTheApplicant')">
@@ -89,7 +90,6 @@ const Form = {
                 <button type="button" class="btn btn-primary" @click="send('CONTINUE')">Continue</button>
               </div>
 
-<!-- Question 2 -->
               <!-- 1.2. The Applicant - You are the representative -->
               <div class="card-body" v-else-if="state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative')">
                 <h3>1.2. The Applicant</h3>
@@ -117,7 +117,7 @@ const Form = {
                   </div>
                 </fieldset>
 
-<!-- Question 3 - Part 1 -->
+<!-- Section 2: Question 2 -->
                 <!-- 1.2. The Applicant - You are the representative - Condo Owner Rep-->
                 <fieldset v-if="state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForPerson')">
                   <legend>Sarah, in what capacity are you representing the Applicant?</legend>
@@ -181,7 +181,7 @@ const Form = {
                   </div>
                 </fieldset>
               </div>
-<!-- Question 3 - Part 2 -->
+<!-- Section 2: Question 3 -->
               <div class="card-body" v-if="state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForPerson.lawyer')
                                             || state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForLegalEntity.lawyer')
                                             || state.matches('section1Expanded.subsection2Shown.youAreTheRepresentative.selectingRepTypeForCondoCorp.lawyer')">
@@ -209,7 +209,7 @@ const Form = {
                 <h4>Employee of Legal Clinic Details</h4>
               </div>
 
-<!-- Question 4 -->
+<!-- Section 2: Question 4 -->
               <!-- 1.2. The Applicant - Other Co-Owners? -->
               <div class="card-body" v-if="coOwnerScenarios.some(state.matches)">
                 <fieldset>
@@ -231,6 +231,7 @@ const Form = {
               </div>
             </section>
 
+<!-- Section 3: Question 1 -->
             <section class="card">
             <!-- 1.3. Co-Owners -->
               <div class="card-body" v-if="state.matches('section1Expanded.subsection3Shown')">
