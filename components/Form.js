@@ -98,7 +98,7 @@ const Form = {
                   <div class="form-check">
                     <input type="radio" class="form-check-input" id="person-applicant"
                         :checked="state.context.applicantType === 'Condo Owner Rep'" value="Condo Owner Rep"
-                        @change="send('SELECT_PERSON_TYPE')" />
+                        @change="send('SELECT_PERSON_APPLICANT_TYPE')" />
                     <label for="person-applicant">The Applicant is the person who owns the condominium unit</label>
                   </div>
                   <div class="form-check">
