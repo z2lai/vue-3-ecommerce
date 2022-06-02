@@ -1,190 +1,378 @@
 const { assign, createMachine } = XState;
 
-const selectingRepTypeForPersonOptions = {
+const setIsCoOwnerEvents = {
+  SET_IS_CO_OWNER_TRUE: [
+    {
+      cond: (context) => context.subsection2Completed,
+      actions: assign({ isCoOwner: (context, event) => true }),
+      target: ".showingSubsection3",
+    },
+    { actions: assign({ isCoOwner: (context, event) => true }) },
+  ],
+  SET_IS_CO_OWNER_FALSE: [
+    {
+      cond: (context) => context.subsection2Completed,
+      actions: assign({ isCoOwner: (context, event) => false }),
+      target: ".showingSubsection3",
+    },
+    { actions: assign({ isCoOwner: (context, event) => false }) },
+  ],
+};
+
+const selectingRepTypeForPersonEvents = {
   // for each of these transitions, create action to clear all inputs unrelated
   // to the selection while leaving the data for related inputs
-  SELECT_LAWYER: ".lawyer",
-  SELECT_FRIEND: ".friend",
-  SELECT_FAMILY_MEMBER: ".familyMember",
-  SELECT_INTERPRETER: ".interpreter",
+  SELECT_LAWYER: {
+    cond: (context) => context.repType !== "Lawyer",
+    target: ".lawyerSelected",
+    actions: "assignRepTypeLawyer",
+  },
+  SELECT_FRIEND: {
+    cond: (context) => context.repType !== "Friend",
+    target: ".friendSelected",
+    actions: "assignRepTypeFriend",
+  },
+  SELECT_FAMILY_MEMBER: {
+    cond: (context) => context.repType !== "Family Member",
+    target: ".familyMemberSelected",
+    actions: "assignRepTypeFamilyMember",
+  },
+  SELECT_INTERPRETER: {
+    cond: (context) => context.repType !== "Interpreter",
+    target: ".interpreterSelected",
+    actions: "assignRepTypeInterpreter",
+  },
 };
 
-const selectingRepTypeForLegalEntityOptions = {
-  SELECT_IN_HOUSE_LEGAL_SERVICES: ".inHouseLegalServices",
-  SELECT_LAWYER: ".lawyer",
-  SELECT_INTERPRETER: ".interpreter",
-  SELECT_EMPLOYEE_FOR_NFP_CLINIC: ".employeeForNFPClinic",
+const selectingRepTypeForLegalEntityEvents = {
+  SELECT_IN_HOUSE_LEGAL_SERVICES_PROVIDER: {
+    cond: (context) => context.repType !== "In-House Legal Services Provider",
+    target: ".inHouseLegalServicesProviderSelected",
+    actions: "assignRepTypeInHouseLegalServicesProvider",
+  },
+  SELECT_LAWYER: {
+    cond: (context) => context.repType !== "Lawyer",
+    target: ".lawyerSelected",
+    actions: "assignRepTypeLawyer",
+  },
+  SELECT_INTERPRETER: {
+    cond: (context) => context.repType !== "Interpreter",
+    target: ".interpreterSelected",
+    actions: "assignRepTypeInterpreter",
+  },
+  SELECT_EMPLOYEE_FOR_NFP_CLINIC: {
+    cond: (context) => context.repType !== "Employee for Not-for-Profit Clinic",
+    target: ".employeeForNFPClinicSelected",
+    actions: "assignRepTypeEmployeeForNFPClinic",
+  },
 };
 
-const selectingRepTypeForCondoCorpOptions = {
-  SELECT_LAWYER: ".lawyer",
-  SELECT_INTERPRETER: ".interpreter",
-  SELECT_EMPLOYEE_FOR_NFP_CLINIC: ".employeeForNFPClinic",
-  SELECT_EMPLOYEE_OF_LEGAL_CLINIC: ".employeeOfLegalClinic",
+const selectingRepTypeForCondoCorpEvents = {
+  SELECT_LAWYER: {
+    cond: (context) => context.repType !== "Lawyer",
+    target: ".lawyerSelected",
+    actions: "assignRepTypeLawyer",
+  },
+  SELECT_INTERPRETER: {
+    cond: (context) => context.repType !== "Interpreter",
+    target: ".interpreterSelected",
+    actions: "assignRepTypeInterpreter",
+  },
+  SELECT_EMPLOYEE_FOR_NFP_CLINIC: {
+    cond: (context) => context.repType !== "Employee for Not-for-Profit Clinic",
+    target: ".employeeForNFPClinicSelected",
+    actions: "assignRepTypeEmployeeForNFPClinic",
+  },
+  SELECT_EMPLOYEE_OF_LEGAL_CLINIC: {
+    cond: (context) => context.repType !== "Employee of Legal Clinic",
+    target: ".employeeOfLegalClinicSelected",
+    actions: "assignRepTypeEmployeeOfLegalClinic",
+  },
+};
+
+const showingSubsection3State = {
+  initial: "default",
+  states: {
+    default: {
+      always: [
+        {
+          cond: (context) => context.isCoOwner,
+          target: "subsection3Shown",
+        },
+        {
+          cond: (context) => !context.isCoOwner,
+          target: "endOfSection1",
+        },
+      ],
+    },
+    subsection3Shown: {
+      tags: ['hasSubsection3'],
+      initial: "default",
+      states: {
+        default: {
+          tags: ['hasContinueButton'],
+          on: {
+            // Add condition for checking length of Co-Owners array
+            CONTINUE: {
+              target: "endOfSection1",
+              actions: 'assignSubsection3CompletedTrue',
+            },
+          },
+        },
+        endOfSection1: {
+          type: "final",
+        },
+      },
+    },
+    endOfSection1: {
+      type: "final",
+    },
+  },
+};
+
+const repTypeForPersonSelectedState = {
+  tags: ['hasCoOwnersQuestion'],
+  initial: "default",
+  on: {
+    ...setIsCoOwnerEvents,
+  },
+  states: {
+    default: {
+      tags: ['hasContinueButton'],
+      on: {
+        CONTINUE: {
+          cond: (context) => context.isCoOwner !== undefined,
+          target: "showingSubsection3",
+          actions: 'assignSubsection2CompletedTrue',
+        },
+      },
+    },
+    showingSubsection3: {
+      ...showingSubsection3State,
+    },
+  },
+};
+
+const repTypeForLegalEntitySelectedState = repTypeForPersonSelectedState;
+
+const repTypeForCondoCorpSelectedState = {
+  initial: "default",
+  states: {
+    default: {
+      tags: ['hasContinueButton'],
+      on: {
+        CONTINUE: "endOfSection1",
+      },
+    },
+    endOfSection1: {
+      type: 'final',
+    },
+  },
 };
 
 const wizardMachine = createMachine(
   {
-    id: "wizard",
-    initial: "section1Expanded",
+    id: "Section1Wizard",
     context: {
-      isValid: false,
-      yourRole: "",
-      applicantType: "",
+      subsection1Completed: false,
+      subsection2Completed: false,
+      subsection3Completed: false,
+      userRole: "",
       isCoOwner: undefined,
+      applicantType: "",
+      repType: "",
+    },
+    initial: "default",
+    on: {
+      SELECT_APPLICANT_ROLE: [
+        {
+          cond: (context) => context.subsection1Completed,
+          actions: "assignFilerRoleApplicant",
+          target: "showingSubsection2",
+        },
+        { actions: "assignFilerRoleApplicant" },
+      ],
+      SELECT_REPRESENTATIVE_ROLE: [
+        {
+          cond: (context) => context.subsection1Completed,
+          actions: "assignFilerRoleRepresentative",
+          target: "showingSubsection2",
+        },
+        { actions: "assignFilerRoleRepresentative" },
+      ],
     },
     states: {
-      section1Expanded: {
+      default: {
         meta: {
-          title: "About You and the Applicant",
+          title: "About You",
         },
-        initial: "subsection1Shown",
-        states: {
-          subsection1Shown: {
-            meta: {
-              title: "About You",
-            },
-            on: {
-              SELECT_APPLICANT_ROLE: {
-                actions: assign({
-                  yourRole: (context, event) => "applicant",
-                  applicantType: (context, event) => "condo owner",
-                }),
-              },
-              SELECT_REPRESENTATIVE_ROLE: {
-                actions: assign({
-                  yourRole: (context, event) => "representative",
-                  applicantType: (context, event) => "",
-                }),
-              },
-              CONTINUE: {
-                cond: (context) => context.yourRole !== "",
-                target: "subsection2Shown",
-              },
-            },
+        tags: ['hasContinueButton'],
+        on: {
+          CONTINUE: {
+            cond: (context) => context.userRole !== "",
+            target: "showingSubsection2",
+            actions: 'assignSubsection1CompletedTrue',
           },
-          subsection2Shown: {
+        },
+      },
+      showingSubsection2: {
+        meta: {
+          title: "About Applicant",
+        },
+        initial: "default",
+        states: {
+          default: {
+            always: [
+              {
+                cond: (context) => context.userRole === "Applicant",
+                target: "fillingInYouAreTheApplicant",
+              },
+              {
+                cond: (context) => context.userRole === "Representative",
+                target: "fillingInYouAreTheRepresentative",
+              },
+            ],
+          },
+          fillingInYouAreTheApplicant: {
             meta: {
-              title: "About Applicant",
+              flow: 1,
             },
+            tags: ['hasCoOwnersQuestion'],
             initial: "default",
+            on: {
+              ...setIsCoOwnerEvents,
+            },
             states: {
               default: {
-                always: [
-                  {
-                    cond: (context) => context.yourRole === "applicant",
-                    target: "youAreTheApplicant",
-                  },
-                  {
-                    cond: (context) => context.yourRole === "representative",
-                    target: "youAreTheRepresentative",
-                  },
-                ],
-              },
-              youAreTheApplicant: {
-                meta: {
-                  flow: 1,
-                },
-                on: { SET_IS_CO_OWNER: { actions: 'setIsCoOwner' }},
-              },
-              youAreTheRepresentative: {
-                initial: "selectingApplicantType",
-                states: {
-                  selectingApplicantType: {},
-                  selectingRepTypeForPerson: {
-                    meta: {
-                      flow: 2,
-                    },
-                    initial: "default",
-                    states: {
-                      default: {},
-                      lawyer: { on: { SET_IS_CO_OWNER: { actions: 'setIsCoOwner' }}},
-                      friend: { on: { SET_IS_CO_OWNER: { actions: 'setIsCoOwner' }}},
-                      familyMember: { on: { SET_IS_CO_OWNER: { actions: 'setIsCoOwner' }}},
-                      interpreter: { on: { SET_IS_CO_OWNER: { actions: 'setIsCoOwner' }}},
-                    },
-                    on: selectingRepTypeForPersonOptions,
-                  },
-                  selectingRepTypeForLegalEntity: {
-                    meta: {
-                      flow: 3,
-                    },
-                    initial: "default",
-                    states: {
-                      default: {},
-                      inHouseLegalServices: { on: { SET_IS_CO_OWNER: { actions: 'setIsCoOwner' }}},
-                      lawyer: { on: { SET_IS_CO_OWNER: { actions: 'setIsCoOwner' }}},
-                      interpreter: { on: { SET_IS_CO_OWNER: { actions: 'setIsCoOwner' }}},
-                      employeeForNFPClinic: { on: { SET_IS_CO_OWNER: { actions: 'setIsCoOwner' }}},
-                    },
-                    on: selectingRepTypeForLegalEntityOptions,
-                  },
-                  selectingRepTypeForCondoCorp: {
-                    initial: "default",
-                    states: {
-                      default: {},
-                      lawyer: {},
-                      interpreter: {},
-                      employeeForNFPClinic: {},
-                      employeeOfLegalClinic: {},
-                    },
-                    on: selectingRepTypeForCondoCorpOptions,
-                  },
-                },
+                tags: ['hasContinueButton'],
                 on: {
-                  SELECT_PERSON_TYPE: {
-                    actions: assign({
-                      applicantType: (context, event) => "Condo Owner Rep",
-                    }),
-                    target: ".selectingRepTypeForPerson",
-                  },
-                  SELECT_LEGAL_ENTITY_TYPE: {
-                    actions: assign({
-                      applicantType: (context, event) => "Legal Entity Rep",
-                    }),
-                    target: ".selectingRepTypeForLegalEntity",
-                  },
-                  SELECT_CONDO_CORP_TYPE: {
-                    actions: assign({
-                      applicantType: (context, event) => "Condo Corp Rep",
-                    }),
-                    target: ".selectingRepTypeForCondoCorp",
+                  CONTINUE: {
+                    cond: (context) => context.isCoOwner !== undefined,
+                    target: "showingSubsection3",
+                    actions: 'assignSubsection2CompletedTrue',
                   },
                 },
               },
-            },
-            on: {
-              CONTINUE: [
-                {
-                  cond: (context) =>
-                    context.yourRole !== "" && context.isCoOwner === true,
-                  target: "subsection3Shown",
-                },
-                {
-                  cond: (context) =>
-                    context.yourRole !== "" && context.isCoOwner === false,
-                  target: "section1Complete",
-                },
-              ],
+              showingSubsection3: {
+                ...showingSubsection3State,
+              },
             },
           },
-          subsection3Shown: {
+          fillingInYouAreTheRepresentative: {
+            initial: "default",
             on: {
-              CONTINUE: "section1Complete",
+              SELECT_PERSON_APPLICANT_TYPE: {
+                cond: (context) => context.applicantType !== "Condo Owner",
+                target: ".selectingRepTypeForPerson",
+                actions: "assignApplicantTypePerson",
+              },
+              SELECT_LEGAL_ENTITY_APPLICANT_TYPE: {
+                cond: (context) => context.applicantType !== "Legal Entity",
+                target: ".selectingRepTypeForLegalEntity",
+                actions: "assignApplicantTypeLegalEntity",
+              },
+              SELECT_CONDO_CORP_APPLICANT_TYPE: {
+                cond: (context) => context.applicantType !== "Condo Corp",
+                target: ".selectingRepTypeForCondoCorp",
+                actions: "assignApplicantTypeCondoCorp",
+              },
             },
-          },
-          section1Complete: {
-            type: "final",
+            states: {
+              default: {},
+              selectingRepTypeForPerson: {
+                initial: "default",
+                on: {
+                  ...selectingRepTypeForPersonEvents,
+                },
+                states: {
+                  default: {},
+                  lawyerSelected: { ...repTypeForPersonSelectedState },
+                  friendSelected: { ...repTypeForPersonSelectedState },
+                  familyMemberSelected: { ...repTypeForPersonSelectedState },
+                  interpreterSelected: { ...repTypeForPersonSelectedState },
+                },
+              },
+              selectingRepTypeForLegalEntity: {
+                initial: "default",
+                on: {
+                  ...selectingRepTypeForLegalEntityEvents,
+                },
+                states: {
+                  default: {},
+                  inHouseLegalServicesProviderSelected: { ...repTypeForLegalEntitySelectedState },
+                  lawyerSelected: { ...repTypeForLegalEntitySelectedState },
+                  interpreterSelected: { ...repTypeForLegalEntitySelectedState },
+                  employeeForNFPClinicSelected: { ...repTypeForLegalEntitySelectedState },
+                },
+              },
+              selectingRepTypeForCondoCorp: {
+                initial: "default",
+                on: {
+                  ...selectingRepTypeForCondoCorpEvents,
+                },
+                states: {
+                  default: {},
+                  lawyerSelected: { ...repTypeForCondoCorpSelectedState },
+                  interpreterSelected: { ...repTypeForCondoCorpSelectedState },
+                  employeeForNFPClinicSelected: { ...repTypeForCondoCorpSelectedState },
+                  employeeOfLegalClinicSelected: { ...repTypeForCondoCorpSelectedState },
+                },
+              },
+            },
           },
         },
-        on: {},
       },
-      section2Expanded: { type: 'final' },
     },
   },
   {
     actions: {
-      setIsCoOwner: assign({ isCoOwner: (context, event) => event.value }),
-    },  
+      assignSubsection1CompletedTrue: assign({
+        subsection1Completed: (context, event) => true,
+      }),
+      assignSubsection2CompletedTrue: assign({
+        subsection2Completed: (context, event) => true,
+      }),
+      assignSubsection3CompletedTrue: assign({
+        subsection3Completed: (context, event) => true,
+      }),
+      assignFilerRoleApplicant: assign({
+        userRole: (context, event) => "Applicant",
+        applicantType: (context, event) => "Condo Owner",
+      }),
+      assignFilerRoleRepresentative: assign({
+        userRole: (context, event) => "Representative",
+        applicantType: (context, event) => "",
+      }),
+      assignApplicantTypePerson: assign({
+        applicantType: (context, event) => "Condo Owner",
+      }),
+      assignApplicantTypeLegalEntity: assign({
+        applicantType: (context, event) => "Legal Entity",
+      }),
+      assignApplicantTypeCondoCorp: assign({
+        applicantType: (context, event) => "Condo Corp",
+      }),
+      assignRepTypeLawyer: assign({
+        repType: (context, event) => "Lawyer",
+      }),
+      assignRepTypeFriend: assign({
+        repType: (context, event) => "Friend",
+      }),
+      assignRepTypeFamilyMember: assign({
+        repType: (context, event) => "FamilyMember",
+      }),
+      assignRepTypeInterpreter: assign({
+        repType: (context, event) => "Interpreter",
+      }),
+      assignRepTypeInHouseLegalServicesProvider: assign({
+        repType: (context, event) => "In-House Legal Services Provider",
+      }),
+      assignRepTypeEmployeeForNFPClinic: assign({
+        repType: (context, event) => "Employee for Not-For-Profit Clinic",
+      }),
+      assignRepTypeEmployeeForLegalClinic: assign({
+        repType: (context, event) => "Employee for Legal Clinic",
+      }),
+    },
   }
 );
