@@ -5,7 +5,11 @@ const Form = {
     
   },
   setup() {
-    const { state, send } = useMachine(wizardMachine);
+    const { state, send, service } = useMachine(wizardMachine);
+    service.onTransition((state) => {
+      console.log(state);
+      console.log(state.done);
+    })
     // const formModel = Vue.reactive({
     //   yourRole: '',
     //   applicantType: "",
@@ -40,7 +44,7 @@ const Form = {
         </div>
         <div class="col-7">
           <h1>1. About You and  Applicant</h1>
-          <form class="card" :class="{ 'border-success': state.done }">
+          <form class="card" :class="{ 'border-success': state.context.section1Completed }">
 <!-- Section 1: Question 1 -->
             <section class="card-body">
               <!-- 1.1. About You -->

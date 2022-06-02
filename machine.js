@@ -121,11 +121,15 @@ const showingSubsection3State = {
         },
         endOfSection1: {
           type: "final",
+          onEntry: 'assignSection1CompletedTrue',
+          onExit: 'assignSection1CompletedFalse',
         },
       },
     },
     endOfSection1: {
       type: "final",
+      onEntry: 'assignSection1CompletedTrue',
+      onExit: 'assignSection1CompletedFalse',
     },
   },
 };
@@ -161,11 +165,15 @@ const repTypeForCondoCorpSelectedState = {
     default: {
       tags: ['hasContinueButton'],
       on: {
-        CONTINUE: "endOfSection1",
+        CONTINUE: {
+          target: 'endOfSection1',
+        }
       },
     },
     endOfSection1: {
       type: 'final',
+      onEntry: 'assignSection1CompletedTrue',
+      onExit: 'assignSection1CompletedFalse',
     },
   },
 };
@@ -177,6 +185,7 @@ const wizardMachine = createMachine(
       subsection1Completed: false,
       subsection2Completed: false,
       subsection3Completed: false,
+      section1Completed: false,
       userRole: "",
       isCoOwner: undefined,
       applicantType: "",
@@ -334,6 +343,12 @@ const wizardMachine = createMachine(
       }),
       assignSubsection3CompletedTrue: assign({
         subsection3Completed: (context, event) => true,
+      }),
+      assignSection1CompletedTrue: assign({
+        section1Completed: (context, event) => true,
+      }),
+      assignSection1CompletedFalse: assign({
+        section1Completed: (context, event) => false,
       }),
       assignFilerRoleApplicant: assign({
         userRole: (context, event) => "Applicant",
