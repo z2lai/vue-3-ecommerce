@@ -353,10 +353,12 @@ const wizardMachine = createMachine(
       assignFilerRoleApplicant: assign({
         userRole: (context, event) => "Applicant",
         applicantType: (context, event) => "Condo Owner",
+        repType: (context, event) => "",
       }),
       assignFilerRoleRepresentative: assign({
         userRole: (context, event) => "Representative",
         applicantType: (context, event) => "",
+        repType: (context, event) => "",
       }),
       assignApplicantTypePerson: assign({
         applicantType: (context, event) => "Condo Owner",
@@ -374,7 +376,7 @@ const wizardMachine = createMachine(
         repType: (context, event) => "Friend",
       }),
       assignRepTypeFamilyMember: assign({
-        repType: (context, event) => "FamilyMember",
+        repType: (context, event) => "Family Member",
       }),
       assignRepTypeInterpreter: assign({
         repType: (context, event) => "Interpreter",
@@ -383,10 +385,10 @@ const wizardMachine = createMachine(
         repType: (context, event) => "In-House Legal Services Provider",
       }),
       assignRepTypeEmployeeForNFPClinic: assign({
-        repType: (context, event) => "Employee for Not-For-Profit Clinic",
+        repType: (context, event) => "Employee for Not-for-Profit Clinic",
       }),
-      assignRepTypeEmployeeForLegalClinic: assign({
-        repType: (context, event) => "Employee for Legal Clinic",
+      assignRepTypeEmployeeOfLegalClinic: assign({
+        repType: (context, event) => "Employee of Legal Clinic",
       }),
     },
   }

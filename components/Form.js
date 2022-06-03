@@ -1,14 +1,24 @@
 const { useMachine } = XStateVue;
+const { State } = XState;
 
 const Form = {
   props: {
     
   },
   setup() {
-    const { state, send, service } = useMachine(wizardMachine);
+    const stateDefinition = JSON.parse(localStorage.getItem('app-state')) || wizardMachine.initialState;
+    const savedState = State.create(stateDefinition);
+    const { state, send, service } = useMachine(wizardMachine, { state: savedState });
+
     service.onTransition((state) => {
       console.log('New State:')
       console.log(state);
+      const jsonState = JSON.stringify(state);
+      try {
+        localStorage.setItem('app-state', jsonState);
+      } catch (e) {
+        console.log(e);
+      }
     })
 
     const getButtonLabel = Vue.computed(() => {
@@ -49,7 +59,7 @@ const Form = {
                       name="role"
                       class="form-check-input"
                       value="applicant"
-                      :checked="state.context.yourRole === 'applicant'"
+                      :checked="state.context.userRole === 'Applicant'"
                       @change="send('SELECT_APPLICANT_ROLE')"
                     />
                   <label for="applicant-role">I am filing this CAT application as the Applicant</label>
@@ -61,7 +71,7 @@ const Form = {
                     name="role"
                     class="form-check-input"
                     value="representative"
-                    :checked="state.context.yourRole === 'representative'"
+                    :checked="state.context.userRole === 'Representative'"
                     @change="send('SELECT_REPRESENTATIVE_ROLE')"
                   />
                   <label for="representative-role">I am filing this CAT application as a representative of the Applicant</label>
@@ -84,20 +94,20 @@ const Form = {
                   <legend>Sarah, can you tell us what kind of Applicant you are representing?</legend>
                   <div class="form-check">
                     <input type="radio" class="form-check-input" id="person-applicant" name="applicantType"
-                        :checked="state.context.applicantType === 'Condo Owner Rep'" value="Condo Owner Rep"
+                        :checked="state.context.applicantType === 'Condo Owner'" value="Condo Owner"
                         @change="send('SELECT_PERSON_APPLICANT_TYPE')" />
                     <label for="person-applicant">The Applicant is the person who owns the condominium unit</label>
                   </div>
                   <div class="form-check">
                     <input type="radio" class="form-check-input" id="legal-entity-applicant" name="applicantType"
-                      :checked="state.context.applicantType === 'Legal Entity Rep'" value="Legal Entity Rep"
+                      :checked="state.context.applicantType === 'Legal Entity'" value="Legal Entity"
                       @change="send('SELECT_LEGAL_ENTITY_APPLICANT_TYPE')"
                     />
                     <label for="legal-entity-applicant">The Applicant is the legal entity that owns the condominium unit</label>
                   </div>
                   <div class="form-check">
                     <input type="radio" class="form-check-input" id="condo-corp-applicant" name="applicantType"
-                      :checked="state.context.applicantType === 'Condo Corp Rep'" value="Condo Corp Rep"
+                      :checked="state.context.applicantType === 'Condo Corp'" value="Condo Corp"
                       @change="send('SELECT_CONDO_CORP_APPLICANT_TYPE')"
                     />
                     <label for="condo-corp-applicant">The Applicant is the condominium corporation</label>
@@ -108,19 +118,23 @@ const Form = {
                 <fieldset v-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForPerson')">
                   <legend>Sarah, in what capacity are you representing the Applicant?</legend>
                   <div class="form-check">
-                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_LAWYER')" />
+                    <input type="radio" name="rep-type" class="form-check-input" 
+                      :checked="state.context.repType === 'Lawyer'" @change="send('SELECT_LAWYER')" />
                     <label>Lawyer/Paralegal</label>
                   </div>
                   <div class="form-check">
-                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_FRIEND')" />
+                    <input type="radio" name="rep-type" class="form-check-input"
+                      :checked="state.context.repType === 'Friend'" @change="send('SELECT_FRIEND')" />
                     <label>Friend/Neighbour</label>
                   </div>
                   <div class="form-check">
-                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_FAMILY_MEMBER')" />
+                    <input type="radio" name="rep-type" class="form-check-input"
+                      :checked="state.context.repType === 'Family Member'" @change="send('SELECT_FAMILY_MEMBER')" />
                     <label>Family Member</label>
                   </div>
                   <div class="form-check">
-                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_INTERPRETER')" />
+                    <input type="radio" name="rep-type" class="form-check-input"
+                      :checked="state.context.repType === 'Interpreter'" @change="send('SELECT_INTERPRETER')" />
                     <label>Interpretor/Translator</label>
                   </div>
                 </fieldset>
@@ -128,19 +142,23 @@ const Form = {
                 <fieldset v-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForLegalEntity')">
                   <legend>Sarah, in what capacity are you representing the Applicant?</legend>
                   <div class="form-check">
-                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_IN_HOUSE_LEGAL_SERVICES')" />
+                    <input type="radio" name="rep-type" class="form-check-input"
+                      :checked="state.context.repType === 'In-House Legal Services Provider'" @change="send('SELECT_IN_HOUSE_LEGAL_SERVICES_PROVIDER')" />
                     <label>In-House Legal Services Provider</label>
                   </div>
                   <div class="form-check">
-                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_LAWYER')" />
+                    <input type="radio" name="rep-type" class="form-check-input"
+                      :checked="state.context.repType === 'Lawyer'" @change="send('SELECT_LAWYER')" />
                     <label>Lawyer/Paralegal</label>
                   </div>
                   <div class="form-check">
-                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_INTERPRETER')" />
+                    <input type="radio" name="rep-type" class="form-check-input"
+                      :checked="state.context.repType === 'Interpreter'" @change="send('SELECT_INTERPRETER')" />
                     <label>Interpretor/Translator</label>
                   </div>
                   <div class="form-check">
-                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_EMPLOYEE_FOR_NFP_CLINIC')" />
+                    <input type="radio" name="rep-type" class="form-check-input"
+                      :checked="state.context.repType === 'Employee for Not-for-Profit Clinic'" @change="send('SELECT_EMPLOYEE_FOR_NFP_CLINIC')" />
                     <label>Employee for Not-for-Profit Clinic</label>
                   </div>
                 </fieldset>
@@ -148,19 +166,23 @@ const Form = {
                 <fieldset v-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForCondoCorp')">
                   <legend>Sarah, in what capacity are you representing the Applicant?</legend>
                   <div class="form-check">
-                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_LAWYER')" />
+                    <input type="radio" name="rep-type" class="form-check-input"
+                      :checked="state.context.repType === 'Lawyer'" @change="send('SELECT_LAWYER')" />
                     <label>Lawyer/Paralegal</label>
                   </div>
                   <div class="form-check">
-                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_INTERPRETER')" />
-                    <label>Interpretor/Translator</label>
+                    <input type="radio" name="rep-type" class="form-check-input"
+                      :checked="state.context.repType === 'Interpreter'" @change="send('SELECT_INTERPRETER')" />
+                    <label>Interpreter/Translator</label>
                   </div>
                   <div class="form-check">
-                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_EMPLOYEE_FOR_NFP_CLINIC')" />
+                    <input type="radio" name="rep-type" class="form-check-input"
+                      :checked="state.context.repType === 'Employee for Not-for-Profit Clinic'" @change="send('SELECT_EMPLOYEE_FOR_NFP_CLINIC')" />
                     <label>Employee for Not-for-Profit Clinic</label>
                   </div>
                   <div class="form-check">
-                    <input type="radio" name="rep-type" class="form-check-input" @change="send('SELECT_EMPLOYEE_OF_LEGAL_CLINIC')" />
+                    <input type="radio" name="rep-type" class="form-check-input"
+                      :checked="state.context.repType === 'Employee of Legal Clinic'" @change="send('SELECT_EMPLOYEE_OF_LEGAL_CLINIC')" />
                     <label>Employee of Legal Clinic</label>
                   </div>
                 </fieldset>
@@ -184,12 +206,12 @@ const Form = {
                 <h4>Interpreter Details</h4>
               </div>
               <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative')
-                                          && state.context.repType === 'In-House Legal Services'">
-                <h4>In-House Legal Services Details</h4>
+                                          && state.context.repType === 'In-House Legal Services Provider'">
+                <h4>In-House Legal Services Provider Details</h4>
               </div>
               <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative')
-                                          && state.context.repType === 'Employee for Non-for-Profit Clinic'">
-                <h4>Employee for Non-for-Profit Clinic Details</h4>
+                                          && state.context.repType === 'Employee for Not-for-Profit Clinic'">
+                <h4>Employee for Not-for-Profit Clinic Details</h4>
               </div>
               <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative')
                                           && state.context.repType === 'Employee of Legal Clinic'">
