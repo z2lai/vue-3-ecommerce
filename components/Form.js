@@ -11,7 +11,12 @@ const Form = {
       console.log(state);
     })
 
-    return { state, send };
+    const getButtonLabel = Vue.computed(() => {
+      const nextState = wizardMachine.withContext(state.context).transition(state.value, 'CONTINUE');
+      return nextState.hasTag('final') ? 'Next Section' : 'CONTINUE';
+    });
+    
+    return { state, send, getButtonLabel };
   },
   template: /*html*/`
     <div class="container-fluid">
@@ -222,7 +227,7 @@ const Form = {
             <div class="card-body">
               <button v-if="state.hasTag('hasButton')"
                 type="button" class="btn btn-primary" @click="send('CONTINUE')">
-                  Continue
+                  {{ getButtonLabel }}
               </button>
             <div>
             <!--
