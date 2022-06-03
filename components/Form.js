@@ -26,8 +26,10 @@ const Form = {
       const nextStateNodeType = nextState.configuration[0].type;
       return nextStateNodeType === 'final' ? 'Next Section' : 'Continue';
     });
+
+    const clearLocalStorage = () => localStorage.removeItem('app-state');
     
-    return { state, send, getButtonLabel };
+    return { state, send, getButtonLabel, clearLocalStorage };
   },
   template: /*html*/`
     <div class="container-fluid">
@@ -41,6 +43,7 @@ const Form = {
             <pre>{{ state.done }}</pre>
             Context:
             <pre>{{ state.context }}</pre>
+            <button type="button" @click="clearLocalStorage">Clear Local Storage</button>
           </div>
         </div>
         <div class="col-7">
