@@ -121,7 +121,6 @@ const showingSubsection3State = {
         },
         endOfSection1: {
           type: "final",
-          tags: ['final'],
           onEntry: 'assignSection1CompletedTrue',
           onExit: 'assignSection1CompletedFalse',
         },
@@ -129,7 +128,6 @@ const showingSubsection3State = {
     },
     endOfSection1: {
       type: "final",
-      tags: ['final'],
       onEntry: 'assignSection1CompletedTrue',
       onExit: 'assignSection1CompletedFalse',
     },
@@ -174,7 +172,6 @@ const repTypeForCondoCorpSelectedState = {
     },
     endOfSection1: {
       type: 'final',
-      tags: ['final'],
       onEntry: 'assignSection1CompletedTrue',
       onExit: 'assignSection1CompletedFalse',
     },

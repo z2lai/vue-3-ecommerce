@@ -23,7 +23,8 @@ const Form = {
 
     const getButtonLabel = Vue.computed(() => {
       const nextState = wizardMachine.withContext(state.context).transition(state.value, 'CONTINUE');
-      return nextState.hasTag('final') ? 'Next Section' : 'CONTINUE';
+      const nextStateNodeType = nextState.configuration[0].type;
+      return nextStateNodeType === 'final' ? 'Next Section' : 'Continue';
     });
     
     return { state, send, getButtonLabel };
