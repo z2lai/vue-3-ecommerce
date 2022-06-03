@@ -7,25 +7,10 @@ const Form = {
   setup() {
     const { state, send, service } = useMachine(wizardMachine);
     service.onTransition((state) => {
+      console.log('New State:')
       console.log(state);
-      console.log(state.done);
     })
-    // const formModel = Vue.reactive({
-    //   yourRole: '',
-    //   applicantType: "",
-    //   isCoOwner: undefined,
-    //   extras: {
-    //     catering: false,
-    //     music: false
-    //   }
-    // });
-    // const coOwnerQuestionStates = [
-    //   'showingSubsection2.fillingInYouAreTheApplicant',
-    //   'showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForPerson.lawyerSelected',
-    //   'showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForPerson.friendSelected',
-    //   'showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForPerson.familyMemberSelected',
-    // ];
-    
+
     return { state, send };
   },
   template: /*html*/`
@@ -45,10 +30,11 @@ const Form = {
         <div class="col-7">
           <h1>1. About You and  Applicant</h1>
           <form class="card" :class="{ 'border-success': state.context.section1Completed }">
-<!-- Section 1: Question 1 -->
+<!-- Section 1.1. About You -->
             <section class="card-body">
-              <!-- 1.1. About You -->
               <h3>1.1. About You</h3>
+
+              <!-- Question 1 -->
               <fieldset>
                 <legend>Are you the Applicant in this application or are you filing this CAT application on behalf of the Applicant?</legend>
                 <div class="form-check">
@@ -78,17 +64,17 @@ const Form = {
               </fieldset>                
             </section>
 
-<!-- Section 2: Question 1 -->
+<!-- Section 1.2. The Applicant -->
             <section class="card-body" v-if="state.matches('showingSubsection2')">
-              <!-- 1.2. The Applicant - You are the applicant -->
+              <h3>1.2. The Applicant</h3>
+
+              <!-- You are the applicant - Question 2 -->
               <div class="" v-if="state.matches('showingSubsection2.fillingInYouAreTheApplicant')">
-                <h3>1.2. The Applicant</h3>
                 Fill in your info.
               </div>
 
-              <!-- 1.2. The Applicant - You are the representative -->
               <div class="" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative')">
-                <h3>1.2. The Applicant</h3>
+                <!-- You are the representative - Question 2 -->
                 <fieldset>
                   <legend>Sarah, can you tell us what kind of Applicant you are representing?</legend>
                   <div class="form-check">
@@ -113,8 +99,7 @@ const Form = {
                   </div>
                 </fieldset>
 
-<!-- Section 2: Question 2 -->
-                <!-- 1.2. The Applicant - You are the representative - Condo Owner Rep-->
+                <!-- You are the representative - Question 3: Condo Owner Rep-->
                 <fieldset v-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForPerson')">
                   <legend>Sarah, in what capacity are you representing the Applicant?</legend>
                   <div class="form-check">
@@ -134,8 +119,7 @@ const Form = {
                     <label>Interpretor/Translator</label>
                   </div>
                 </fieldset>
-
-                <!-- 1.2. The Applicant - You are the representative - Legal Entity Rep-->
+                <!-- You are the representative - Question 3: Legal Entity Rep-->
                 <fieldset v-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForLegalEntity')">
                   <legend>Sarah, in what capacity are you representing the Applicant?</legend>
                   <div class="form-check">
@@ -155,8 +139,7 @@ const Form = {
                     <label>Employee for Not-for-Profit Clinic</label>
                   </div>
                 </fieldset>
-
-                <!-- 1.2. The Applicant - You are the representative - Condo Corp Rep-->
+                <!-- You are the representative - Question 3: Condo Corp Rep-->
                 <fieldset v-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForCondoCorp')">
                   <legend>Sarah, in what capacity are you representing the Applicant?</legend>
                   <div class="form-check">
@@ -178,36 +161,37 @@ const Form = {
                 </fieldset>
               </div>
 
-<!-- Section 2: Question 3 -->
-              <div class="mt-3" v-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForPerson.lawyerSelected')
-                                            || state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForLegalEntity.lawyerSelected')
-                                            || state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForCondoCorp.lawyerSelected')">
+              <!-- You are the representative - Question 4: Fill in your Your Details-->
+              <div class="mt-3" v-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative')
+                                      && state.context.repType === 'Lawyer'">
                 <h4>Lawyer/Paralegal Details</h4>
               </div>
-              <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForPerson.friendSelected')">
+              <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative')
+                                          && state.context.repType === 'Friend'">
                 <h4>Friend Details</h4>
               </div>
-              <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForPerson.familyMemberSelected')">
+              <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative')
+                                          && state.context.repType === 'Family Member'">
                 <h4>Family Member Details</h4>
               </div>
-              <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForPerson.interpreterSelected')
-                                                || state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForLegalEntity.interpreterSelected')
-                                                || state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForCondoCorp.interpreterSelected')">
+              <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative')
+                                          && state.context.repType === 'Interpreter'">
                 <h4>Interpreter Details</h4>
               </div>
-              <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForLegalEntity.inHouseLegalServicesSelected')">
+              <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative')
+                                          && state.context.repType === 'In-House Legal Services'">
                 <h4>In-House Legal Services Details</h4>
               </div>
-              <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForLegalEntity.employeeForNFPClinicSelected')
-                                                || state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForCondoCorp.employeeForNFPClinicSelected')">
+              <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative')
+                                          && state.context.repType === 'Employee for Non-for-Profit Clinic'">
                 <h4>Employee for Non-for-Profit Clinic Details</h4>
               </div>
-              <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative.selectingRepTypeForCondoCorp.employeeOfLegalClinicSelected')">
+              <div class="mt-3" v-else-if="state.matches('showingSubsection2.fillingInYouAreTheRepresentative')
+                                          && state.context.repType === 'Employee of Legal Clinic'">
                 <h4>Employee of Legal Clinic Details</h4>
               </div>
 
-<!-- Section 2: Question 4 -->
-              <!-- 1.2. The Applicant - Other Co-Owners? -->
+              <!-- You are the representative - Question 5: Other Co-Owners?-->
               <div class="" v-if="state.hasTag('hasCoOwnersQuestion')">
                 <fieldset>
                   <legend>Are there any other co-owners?</legend>
@@ -227,15 +211,16 @@ const Form = {
               </div>
             </section>
 
-<!-- Section 3: Question 1 -->
+<!-- Section 1.3. Co-Owners -->
             <section class="card-body" v-if="state.hasTag('hasSubsection3')">
-              <!-- 1.3. Co-Owners -->
               <h3>1.3 Co-Owners</h3>
+              
+              <!-- Question 6: Add Co-Owners -->
               <h4>Add co-owners</h4>
             </section>
 
             <div class="card-body">
-              <button v-if="state.hasTag('hasContinueButton')"
+              <button v-if="state.hasTag('hasButton')"
                 type="button" class="btn btn-primary" @click="send('CONTINUE')">
                   Continue
               </button>

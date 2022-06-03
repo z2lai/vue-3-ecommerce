@@ -24,22 +24,22 @@ const selectingRepTypeForPersonEvents = {
   // to the selection while leaving the data for related inputs
   SELECT_LAWYER: {
     cond: (context) => context.repType !== "Lawyer",
-    target: ".lawyerSelected",
+    target: ".repTypeForPersonSelected",
     actions: "assignRepTypeLawyer",
   },
   SELECT_FRIEND: {
     cond: (context) => context.repType !== "Friend",
-    target: ".friendSelected",
+    target: ".repTypeForPersonSelected",
     actions: "assignRepTypeFriend",
   },
   SELECT_FAMILY_MEMBER: {
     cond: (context) => context.repType !== "Family Member",
-    target: ".familyMemberSelected",
+    target: ".repTypeForPersonSelected",
     actions: "assignRepTypeFamilyMember",
   },
   SELECT_INTERPRETER: {
     cond: (context) => context.repType !== "Interpreter",
-    target: ".interpreterSelected",
+    target: ".repTypeForPersonSelected",
     actions: "assignRepTypeInterpreter",
   },
 };
@@ -47,22 +47,22 @@ const selectingRepTypeForPersonEvents = {
 const selectingRepTypeForLegalEntityEvents = {
   SELECT_IN_HOUSE_LEGAL_SERVICES_PROVIDER: {
     cond: (context) => context.repType !== "In-House Legal Services Provider",
-    target: ".inHouseLegalServicesProviderSelected",
+    target: ".repTypeForLegalEntitySelected",
     actions: "assignRepTypeInHouseLegalServicesProvider",
   },
   SELECT_LAWYER: {
     cond: (context) => context.repType !== "Lawyer",
-    target: ".lawyerSelected",
+    target: ".repTypeForLegalEntitySelected",
     actions: "assignRepTypeLawyer",
   },
   SELECT_INTERPRETER: {
     cond: (context) => context.repType !== "Interpreter",
-    target: ".interpreterSelected",
+    target: ".repTypeForLegalEntitySelected",
     actions: "assignRepTypeInterpreter",
   },
   SELECT_EMPLOYEE_FOR_NFP_CLINIC: {
     cond: (context) => context.repType !== "Employee for Not-for-Profit Clinic",
-    target: ".employeeForNFPClinicSelected",
+    target: ".repTypeForLegalEntitySelected",
     actions: "assignRepTypeEmployeeForNFPClinic",
   },
 };
@@ -70,22 +70,22 @@ const selectingRepTypeForLegalEntityEvents = {
 const selectingRepTypeForCondoCorpEvents = {
   SELECT_LAWYER: {
     cond: (context) => context.repType !== "Lawyer",
-    target: ".lawyerSelected",
+    target: ".repTypeForCondoCorpSelected",
     actions: "assignRepTypeLawyer",
   },
   SELECT_INTERPRETER: {
     cond: (context) => context.repType !== "Interpreter",
-    target: ".interpreterSelected",
+    target: ".repTypeForCondoCorpSelected",
     actions: "assignRepTypeInterpreter",
   },
   SELECT_EMPLOYEE_FOR_NFP_CLINIC: {
     cond: (context) => context.repType !== "Employee for Not-for-Profit Clinic",
-    target: ".employeeForNFPClinicSelected",
+    target: ".repTypeForCondoCorpSelected",
     actions: "assignRepTypeEmployeeForNFPClinic",
   },
   SELECT_EMPLOYEE_OF_LEGAL_CLINIC: {
     cond: (context) => context.repType !== "Employee of Legal Clinic",
-    target: ".employeeOfLegalClinicSelected",
+    target: ".repTypeForCondoCorpSelected",
     actions: "assignRepTypeEmployeeOfLegalClinic",
   },
 };
@@ -110,7 +110,7 @@ const showingSubsection3State = {
       initial: "default",
       states: {
         default: {
-          tags: ['hasContinueButton'],
+          tags: ['hasButton'],
           on: {
             // Add condition for checking length of Co-Owners array
             CONTINUE: {
@@ -121,6 +121,7 @@ const showingSubsection3State = {
         },
         endOfSection1: {
           type: "final",
+          tags: ['final'],
           onEntry: 'assignSection1CompletedTrue',
           onExit: 'assignSection1CompletedFalse',
         },
@@ -128,6 +129,7 @@ const showingSubsection3State = {
     },
     endOfSection1: {
       type: "final",
+      tags: ['final'],
       onEntry: 'assignSection1CompletedTrue',
       onExit: 'assignSection1CompletedFalse',
     },
@@ -142,7 +144,7 @@ const repTypeForPersonSelectedState = {
   },
   states: {
     default: {
-      tags: ['hasContinueButton'],
+      tags: ['hasButton'],
       on: {
         CONTINUE: {
           cond: (context) => context.isCoOwner !== undefined,
@@ -163,7 +165,7 @@ const repTypeForCondoCorpSelectedState = {
   initial: "default",
   states: {
     default: {
-      tags: ['hasContinueButton'],
+      tags: ['hasButton'],
       on: {
         CONTINUE: {
           target: 'endOfSection1',
@@ -172,6 +174,7 @@ const repTypeForCondoCorpSelectedState = {
     },
     endOfSection1: {
       type: 'final',
+      tags: ['final'],
       onEntry: 'assignSection1CompletedTrue',
       onExit: 'assignSection1CompletedFalse',
     },
@@ -215,7 +218,7 @@ const wizardMachine = createMachine(
         meta: {
           title: "About You",
         },
-        tags: ['hasContinueButton'],
+        tags: ['hasButton'],
         on: {
           CONTINUE: {
             cond: (context) => context.userRole !== "",
@@ -253,7 +256,7 @@ const wizardMachine = createMachine(
             },
             states: {
               default: {
-                tags: ['hasContinueButton'],
+                tags: ['hasButton'],
                 on: {
                   CONTINUE: {
                     cond: (context) => context.isCoOwner !== undefined,
@@ -295,10 +298,9 @@ const wizardMachine = createMachine(
                 },
                 states: {
                   default: {},
-                  lawyerSelected: { ...repTypeForPersonSelectedState },
-                  friendSelected: { ...repTypeForPersonSelectedState },
-                  familyMemberSelected: { ...repTypeForPersonSelectedState },
-                  interpreterSelected: { ...repTypeForPersonSelectedState },
+                  repTypeForPersonSelected: { 
+                    ...repTypeForPersonSelectedState 
+                  },
                 },
               },
               selectingRepTypeForLegalEntity: {
@@ -308,10 +310,9 @@ const wizardMachine = createMachine(
                 },
                 states: {
                   default: {},
-                  inHouseLegalServicesProviderSelected: { ...repTypeForLegalEntitySelectedState },
-                  lawyerSelected: { ...repTypeForLegalEntitySelectedState },
-                  interpreterSelected: { ...repTypeForLegalEntitySelectedState },
-                  employeeForNFPClinicSelected: { ...repTypeForLegalEntitySelectedState },
+                  repTypeForLegalEntitySelected: { 
+                    ...repTypeForLegalEntitySelectedState 
+                  },
                 },
               },
               selectingRepTypeForCondoCorp: {
@@ -321,10 +322,9 @@ const wizardMachine = createMachine(
                 },
                 states: {
                   default: {},
-                  lawyerSelected: { ...repTypeForCondoCorpSelectedState },
-                  interpreterSelected: { ...repTypeForCondoCorpSelectedState },
-                  employeeForNFPClinicSelected: { ...repTypeForCondoCorpSelectedState },
-                  employeeOfLegalClinicSelected: { ...repTypeForCondoCorpSelectedState },
+                  repTypeForCondoCorpSelected: { 
+                    ...repTypeForCondoCorpSelectedState 
+                  },
                 },
               },
             },
