@@ -1,5 +1,8 @@
+const { reactive, ref } = Vue;
 const { useMachine } = XStateVue;
 const { State } = XState;
+const { useVuelidate } = Vuelidate;
+const { required, email } = VuelidateValidators;
 
 const Form = {
   props: {
@@ -8,7 +11,28 @@ const Form = {
   setup() {
     const stateDefinition = JSON.parse(localStorage.getItem('app-state')) || wizardMachine.initialState;
     const savedState = State.create(stateDefinition);
+    console.log(`savedState:`);
+    console.log(savedState);
     const { state, send, service } = useMachine(wizardMachine, { state: savedState });
+
+    const context = state.context??
+    const vuelidateTextInput = ref('');
+
+    const rules = reactive ({
+      vuelidateCheck: { required },
+      state: {
+        context: {
+          userRole: { required },
+        }
+      }
+    })
+    const v$ = useVuelidate(rules, { vuelidateTextInput, state.context } )
+
+    const validateForm = async function() {
+      const isFormCorrect = await this.v$.$validate()
+      // you can show some extra alert to the user or just leave the each field to show it's `$errors`.
+      console.log(`isFormCorrect: ${isFormCorrect}`);
+    }
 
     service.onTransition((state) => {
       console.log('New State:')
@@ -22,14 +46,18 @@ const Form = {
     })
 
     const getButtonLabel = Vue.computed(() => {
-      const nextState = wizardMachine.withContext(state.context).transition(state.value, 'CONTINUE');
+      const nextState = wizardMachine
+          .withContext(state.value.context)
+          .transition(state.value, 'CONTINUE');
+      console.log('Button Computed:');
+      console.log(nextState);
       const nextStateNodeType = nextState.configuration[0].type;
       return nextStateNodeType === 'final' ? 'Next Section' : 'Continue';
     });
 
     const clearLocalStorage = () => localStorage.removeItem('app-state');
     
-    return { state, send, getButtonLabel, clearLocalStorage };
+    return { state, send, getButtonLabel, clearLocalStorage, vuelidateTextInput, v$, validateForm };
   },
   template: /*html*/`
     <div class="container-fluid">
@@ -49,9 +77,26 @@ const Form = {
         <div class="col-7">
           <h1>1. About You and  Applicant</h1>
           <form class="card" :class="{ 'border-success': state.context.section1Completed }">
+          <p
+            v-for="error of v$.$errors"
+            :key="error.$uid"
+          >
+            <strong>{{ error.$validator }}</strong>
+            <small> on property</small>
+            <strong>{{ error.$property }}</strong>
+            <small> says:</small>
+            <strong>{{ error.$message }}</strong>
+          </p>
 <!-- Section 1.1. About You -->
             <section class="card-body">
               <h3>1.1. About You</h3>
+              <!-- Vuelidate Check 1 -->
+              <div :class="{ error: v$.vuelidateCheck.$errors.length }">
+                <input :value="vuelidateTextInput" @change="event => vuelidateTextInput = event.target.value">
+                <div class="input-errors" v-for="error of v$.$errors" :key="error.$uid">
+                  <div class="error-msg">{{ error.$message }}</div>
+                </div>
+              </div>
 
               <!-- Question 1 -->
               <fieldset>
@@ -80,7 +125,10 @@ const Form = {
                   />
                   <label for="representative-role">I am filing this CAT application as a representative of the Applicant</label>
                 </div>
-              </fieldset>                
+              </fieldset>
+              <div class="input-errors" v-for="error of v$.state.context.userRole.$errors" :key="error.$uid">
+                <div class="error-msg">{{ error.$message }}</div>
+              </div>           
             </section>
 
 <!-- Section 1.2. The Applicant -->
@@ -252,7 +300,7 @@ const Form = {
 
             <div class="card-body">
               <button v-if="state.hasTag('hasButton')"
-                type="button" class="btn btn-primary" @click="send('CONTINUE')">
+                type="button" class="btn btn-primary" @click="()=>{validateForm(); send('CONTINUE')}">
                   {{ getButtonLabel }}
               </button>
             <div>

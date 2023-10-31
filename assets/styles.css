@@ -304,3 +304,7 @@ select::ms-expand {
 .button.-icon-center {
   padding: 0 20px;
 }
+
+.card {
+  border-width: 3px;
+}
